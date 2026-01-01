@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>English Listening Mini</title>
+  <style>
+    :root { font-family: -apple-system, system-ui, Segoe UI, Roboto, Arial; }
+    body { margin:0; background:#0b0f14; color:#e8eef7; }
+    header { padding:16px 16px 8px; position:sticky; top:0; background:rgba(11,15,20,.92); backdrop-filter: blur(8px); border-bottom:1px solid #1b2430;}
+    h1 { margin:0; font-size:18px; }
+    .sub { margin:6px 0 0; font-size:12px; color:#a9b7c7; line-height:1.4; }
+    main { padding:12px 16px 90px; }
+    .card { background:#111925; border:1px solid #1b2430; border-radius:14px; padding:12px; margin:10px 0; }
+    .row { display:flex; gap:10px; flex-wrap: wrap; align-items:center; }
+    button, select, input[type="range"] {
+      border-radius:12px; border:1px solid #263245;
+      background:#141f2e; color:#e8eef7; padding:10px 12px; font-size:14px;
+    }
+    button.primary { background:#1f6feb; border-color:#1f6feb; }
+    button.danger { background:#b42318; border-color:#b42318; }
+    button:disabled { opacity:.45; cursor:not-allowed; }
+    .label { font-size:12px; color:#a9b7c7; margin-bottom:6px; }
+    .pill { font-size:12px; padding:6px 10px; border:1px solid #263245; border-radius:999px; background:#0f1622; color:#a9b7c7;}
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .hint { font-size:12px; color:#a9b7c7; line-height:1.5; }
+    .big { font-size:16px; line-height:1.65; white-space:pre-wrap; }
+    .hidden { display:none; }
+    .footer { position:fixed; bottom:0; left:0; right:0; padding:10px 16px; background:rgba(11,15,20,.92); border-top:1px solid #1b2430; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>English Listening Mini（iPhone）</h1>
+  <div class="sub">
+    分类 + 盲听 / 双语 + 调速 + 单词/句子。<br>
+    ⚠️ iPhone 网页语音通常不支持锁屏后台稳定播放（不锁屏可蓝牙）。
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <div class="row">
+      <span class="pill" id="status">Ready</span>
+      <button class="primary" id="btnPlay">Play</button>
+      <button id="btnNext">Next</button>
+      <button class="danger" id="btnStop" disabled>Stop</button>
+      <button id="btnShuffle">Shuffle</button>
+    </div>
+
+    <div style="height:10px"></div>
+
+    <div class="row">
+      <div style="flex:1; min-width:170px;">
+        <div class="label">分类 Category</div>
+        <select id="cat"></select>
+      </div>
+
+      <div style="flex:1; min-width:170px;">
+        <div class="label">内容 Item</div>
+        <select id="item"></select>
+      </div>
+
+      <div style="flex:1; min-width:170px;">
+        <div class="label">练法 Unit</div>
+        <select id="unit">
+          <option value="sentence" selected>句子 Sentence</option>
+          <option value="word">单词 Word</option>
+        </select>
+      </div>
+
+      <div style="flex:1; min-width:170px;">
+        <div class="label">模式 Mode</div>
+        <select id="mode">
+          <option value="blind" selected>英语盲听（隐藏文字）</option>
+          <option value="en">英语显示</option>
+          <option value="enzh">英语 + 中文</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="height:10px"></div>
+
+    <div class="row">
+      <div style="flex:1; min-width:170px;">
+        <div class="label">朗读 Voice（English）</div>
+        <select id="voiceEn"></select>
+      </div>
+
+      <div style="flex:1; min-width:170px;">
+        <div class="label">中文朗读（可选）</div>
+        <select id="voiceZh"></select>
+      </div>
+
+      <div style="flex:1; min-width:170px;">
+        <div class="label">速度 Speed: <span class="mono" id="rateVal">1.0</span>x</div>
+        <input type="range" id="rate" min="0.7" max="1.3" step="0.05" value="1.0" />
+      </div>
+
+      <div style="flex:1; min-width:170px;">
+        <div class="label">双语朗读</div>
+        <select id="bilingualSpeak">
+          <option value="en_only" selected>只读英文</option>
+          <option value="en_then_zh">英 → 中</option>
+          <option value="zh_then_en">中 → 英</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="height:10px"></div>
+    <div class="hint">
+      建议训练顺序：先选“英语盲听”听 1 遍 → 再切“英语+中文”核对 → 再回“盲听”复听。
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <span class="pill">显示 Display</span>
+    </div>
+    <div style="height:10px"></div>
+    <div id="display" class="big"></div>
+    <div id="blindHint" class="hint hidden">盲听模式：只听不看。听完再切换到“英语+中文”。</div>
+  </div>
+</main>
+
+<div class="footer">
+  <div class="row">
+    <span class="pill">盲听</span>
+    <span class="pill">双语核对</span>
+    <span class="pill">复听</span>
+    <span class="pill">每天 5–10 分钟</span>
+  </div>
+</div>
+
+<script>
+  // 数据：你要的分类（可继续加）
+  const DATA = {
+    "打招呼": [
+      { en: "Hi, how’s it going?", zh: "嗨，最近怎么样？" },
+      { en: "Nice to meet you.", zh: "很高兴认识你。" },
+      { en: "Could you say that again, slowly?", zh: "你能慢一点再说一遍吗？" }
+    ],
+    "生鲜生活": [
+      { en: "How much is this per pound?", zh: "这个每磅多少钱？" },
+      { en: "Do you have fresh eggs today?", zh: "你们今天有新鲜鸡蛋吗？" },
+      { en: "I’ll take two bananas and one avocado.", zh: "我要两根香蕉和一个牛油果。" }
+    ],
+    "通行交通": [
+      { en: "Where is the nearest bus stop?", zh: "最近的公交站在哪？" },
+      { en: "How long does it take to get there?", zh: "到那儿大概要多久？" },
+      { en: "Can you drop me off here, please?", zh: "麻烦在这里让我下车。" }
+    ],
+    "日常": [
+      { en: "I’m looking for a cheap room to rent.", zh: "我在找便宜的房间出租。" },
+      { en: "My phone data is slow. Is it throttled?", zh: "我手机流量很慢，是不是被限速了？" },
+      { en: "I don’t have a car yet. What’s the best option?", zh: "我还没有车，最好的选择是什么？" }
+    ]
+  };
+
+  const catSel = document.getElementById('cat');
+  const itemSel = document.getElementById('item');
+  const unitSel = document.getElementById('unit');
+  const modeSel = document.getElementById('mode');
+  const voiceEnSel = document.getElementById('voiceEn');
+  const voiceZhSel = document.getElementById('voiceZh');
+  const rate = document.getElementById('rate');
+  const rateVal = document.getElementById('rateVal');
+  const bilingualSpeak = document.getElementById('bilingualSpeak');
+
+  const btnPlay = document.getElementById('btnPlay');
+  const btnNext = document.getElementById('btnNext');
+  const btnStop = document.getElementById('btnStop');
+  const btnShuffle = document.getElementById('btnShuffle');
+  const status = document.getElementById('status');
+
+  const display = document.getElementById('display');
+  const blindHint = document.getElementById('blindHint');
+
+  let voices = [];
+  let stopRequested = false;
+  let isPlaying = false;
+
+  function setStatus(msg){ status.textContent = msg; }
+
+  function loadCats(){
+    catSel.innerHTML = '';
+    Object.keys(DATA).forEach((c,i)=>{
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      catSel.appendChild(opt);
+    });
+    catSel.selectedIndex = 0;
+  }
+
+  function loadItems(){
+    itemSel.innerHTML = '';
+    const items = DATA[catSel.value] || [];
+    items.forEach((it,i)=>{
+      const opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = it.en;
+      itemSel.appendChild(opt);
+    });
+    itemSel.selectedIndex = 0;
+  }
+
+  function currentItem(){
+    const items = DATA[catSel.value] || [];
+    return items[parseInt(itemSel.value,10)] || items[0];
+  }
+
+  function splitWords(text){
+    return text.replace(/[^\w\s']/g,'').split(/\s+/).map(s=>s.trim()).filter(Boolean);
+  }
+
+  function splitSentences(text){
+    return text.replace(/\s+/g,' ').split(/(?<=[\.\?\!])\s+/).map(s=>s.trim()).filter(Boolean);
+  }
+
+  function render(){
+    const it = currentItem();
+    const mode = modeSel.value;
+
+    if(mode === 'blind'){
+      display.textContent = "";
+      blindHint.classList.remove('hidden');
+    } else if (mode === 'en'){
+      display.textContent = it.en;
+      blindHint.classList.add('hidden');
+    } else {
+      display.textContent = `EN: ${it.en}\nZH: ${it.zh}`;
+      blindHint.classList.add('hidden');
+    }
+  }
+
+  function pickVoice(prefix){
+    const langVoices = voices.filter(v => (v.lang||"").toLowerCase().startsWith(prefix));
+    const sel = prefix === 'en' ? voiceEnSel.value : voiceZhSel.value;
+    const found = voices.find(v=>v.name === sel);
+    return found || langVoices[0] || voices[0];
+  }
+
+  function speak(text, voice){
+    return new Promise(resolve=>{
+      const u = new SpeechSynthesisUtterance(text);
+      u.voice = voice;
+      u.rate = parseFloat(rate.value);
+      u.onend = resolve;
+      u.onerror = resolve;
+      speechSynthesis.speak(u);
+    });
+  }
+
+  async function playCurrent(){
+    const it = currentItem();
+    const unit = unitSel.value;
+    const mode = modeSel.value;
+    const bi = bilingualSpeak.value;
+
+    const enVoice = pickVoice('en');
+    const zhVoice = pickVoice('zh');
+
+    let enUnits = unit === 'word' ? splitWords(it.en) : splitSentences(it.en);
+    if(enUnits.length === 0) enUnits = [it.en];
+
+    stopRequested = false;
+    isPlaying = true;
+    btnStop.disabled = false;
+    btnPlay.disabled = true;
+
+    setStatus("Playing…");
+
+    // 盲听/显示不影响朗读，只影响是否展示文字
+    render();
+
+    // 朗读英文（按单词/句子）
+    for(const u of enUnits){
+      if(stopRequested) break;
+      await speak(u, enVoice);
+    }
+
+    // 双语朗读逻辑（只在 enzh 模式或你想要时）
+    if(!stopRequested && mode === 'enzh'){
+      if(bi === 'en_then_zh'){
+        await speak(it.zh, zhVoice);
+      } else if (bi === 'zh_then_en'){
+        await speak(it.zh, zhVoice);
+        // 再读一遍英文整句（不按单词拆）
+        await speak(it.en, enVoice);
+      } // en_only 什么都不加
+    }
+
+    speechSynthesis.cancel();
+    isPlaying = false;
+    btnStop.disabled = true;
+    btnPlay.disabled = false;
+    setStatus("Done");
+  }
+
+  function stop(){
+    stopRequested = true;
+    speechSynthesis.cancel();
+    isPlaying = false;
+    btnStop.disabled = true;
+    btnPlay.disabled = false;
+    setStatus("Stopped");
+  }
+
+  function shuffle(){
+    const cats = Object.keys(DATA);
+    const c = cats[Math.floor(Math.random()*cats.length)];
+    catSel.value = c;
+    loadItems();
+    const count = (DATA[c]||[]).length;
+    itemSel.value = String(Math.floor(Math.random()*Math.max(1,count)));
+    render();
+    setStatus("Shuffled");
+  }
+
+  function loadVoices(){
+    voices = speechSynthesis.getVoices();
+    const en = voices.filter(v => (v.lang||"").toLowerCase().startsWith('en'));
+    const zh = voices.filter(v => (v.lang||"").toLowerCase().startsWith('zh'));
+
+    voiceEnSel.innerHTML = '';
+    (en.length?en:voices).forEach(v=>{
+      const opt = document.createElement('option');
+      opt.value = v.name;
+      opt.textContent = `${v.name} (${v.lang})`;
+      voiceEnSel.appendChild(opt);
+    });
+
+    voiceZhSel.innerHTML = '';
+    (zh.length?zh:voices).forEach(v=>{
+      const opt = document.createElement('option');
+      opt.value = v.name;
+      opt.textContent = `${v.name} (${v.lang})`;
+      voiceZhSel.appendChild(opt);
+    });
+
+    if(voiceEnSel.options.length) voiceEnSel.selectedIndex = 0;
+    if(voiceZhSel.options.length) voiceZhSel.selectedIndex = 0;
+  }
+
+  // Events
+  btnPlay.addEventListener('click', playCurrent);
+  btnStop.addEventListener('click', stop);
+  btnNext.addEventListener('click', ()=>{
+    const items = DATA[catSel.value] || [];
+    let idx = parseInt(itemSel.value,10) || 0;
+    idx = (idx + 1) % Math.max(1, items.length);
+    itemSel.value = String(idx);
+    render();
+    setStatus("Next ready");
+  });
+  btnShuffle.addEventListener('click', shuffle);
+
+  catSel.addEventListener('change', ()=>{ loadItems(); render(); });
+  itemSel.addEventListener('change', render);
+  unitSel.addEventListener('change', render);
+  modeSel.addEventListener('change', render);
+
+  rate.addEventListener('input', ()=> rateVal.textContent = rate.value);
+
+  // Init
+  loadCats();
+  loadItems();
+  render();
+  if('speechSynthesis' in window){
+    loadVoices();
+    speechSynthesis.onvoiceschanged = loadVoices;
+  } else {
+    alert("This device/browser doesn't support Speech Synthesis.");
+  }
+  setStatus("Ready");
+</script>
+</body>
+</html>
